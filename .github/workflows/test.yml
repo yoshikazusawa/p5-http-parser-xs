@@ -1,0 +1,47 @@
+name: test
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        perl:
+          #- '5.14'
+          #  - '5.16'
+          #  - '5.18'
+          #  - '5.20'
+          #  - '5.22'
+          #  - '5.24'
+          #  - '5.26'
+          #  - '5.28'
+          #  - '5.30'
+          #  - '5.32'
+          #  - '5.34'
+          #  - '5.36'
+            - '5.38'
+    name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl }}
+      - run: perl -V
+      - run: cpanm Module::Install
+      - run: cpanm Module::Install::TestTarget
+      - run: cpanm Module::Install::ReadmeFromPod
+      - name: Run Makefile.PL
+        run: perl Makefile.PL
+      - name: Run Make
+        run: make
+      - name: Run Tests
+        run: make test
